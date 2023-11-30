@@ -5,35 +5,15 @@ from pygame.sprite import Sprite
 
 from vector import Vector
 
+from ghost_ai import \
+    GhostMode, get_next_move_tile, get_target_tile_inky, get_target_tile_blinky,\
+    get_target_tile_clyde, get_target_tile_pinky, OPPOSITE_DIR
 from util import *
 from timer import Timer, TimerDict, TimerDual
 import maze as mz
 import application as app
 import play as pl
 
-DIR_VECTOR = {
-    'up': (0, -1),
-    'left': (-1, 0),
-    'down': (0, 1),
-    'right': (1, 0)
-}
-
-OPPOSITE_DIR = {
-    'up': 'down',
-    'left': 'right',
-    'down': 'up',
-    'right': 'left'
-}
-
-class GhostMode(Enum):
-    SCATTER = 1
-    CHASE = 2
-    FRIGHTENED = 3
-    EATEN_INVISIBLE = 4
-    EATEN = 5
-    GHOST_HOUSE_JOINING = 6
-    GHOST_HOUSE_INSIDE = 7
-    GHOST_HOUSE_LEAVING = 8
 
 class Ghost(Sprite):
     """Base class for the ghosts. Should not be instantiated!"""
@@ -129,37 +109,13 @@ class Ghost(Sprite):
 
     def update_next_tile(self):
         """Sets `self.next_tile` based on `self.target`."""
-        opposite_dir = OPPOSITE_DIR[self.facing]
-        opposite_tile =\
-            (self.tile[0]+DIR_VECTOR[OPPOSITE_DIR[self.facing]][0], self.tile[1]+DIR_VECTOR[OPPOSITE_DIR[self.facing]][1])
-        candidate_dirs = ['up', 'left', 'down', 'right']
-        candidate_dirs.remove(opposite_dir)
-        candidate_tiles = {}
-        dist = {}
-
-        # wall check
-        for dir in candidate_dirs:
-            vec = DIR_VECTOR[dir]
-            check_tile = (self.tile[0]+vec[0], self.tile[1]+vec[1])
-            state = self.maze.get_tile_state(Vector(check_tile[0], check_tile[1]))
-            if state in [0, -1, 6, 7] or (self.mode not in [GhostMode.GHOST_HOUSE_JOINING, GhostMode.GHOST_HOUSE_LEAVING] and state == 4):
-                # skip non-traversable, and if not in eaten
-                # state, skip ghost house entrance.
-                continue
-            candidate_tiles[dir] = check_tile
-            dist[dir] = Vector.distance_squared(Vector(*check_tile), Vector(*self.target))
-        
-        if len(candidate_tiles) > 0:
-            if self.mode == GhostMode.FRIGHTENED:
-                # frightened; pick random tile
-                dir = random.choice(list(candidate_tiles.keys()))
-            else:
-                # go towards target
-                dir = min(dist, key=dist.get)
-        else:
-            dir = opposite_dir
-
-        self.tile_next = candidate_tiles[dir] if dir != opposite_dir else opposite_tile
+        self.tile_next = get_next_move_tile(
+            from_tile=self.tile,
+            target_tile=self.target,
+            maze=self.maze,
+            facing=self.facing,
+            cur_mode=self.mode
+        )
         # print(f'Tiles: {candidate_tiles}')
         # print(f'Dist: {dist}')
         # print(self.facing + '\n')
@@ -259,11 +215,11 @@ class Ghost(Sprite):
         self.maze.blit_relative(self.image, r)
 
         # DEBUG: draw current target
-        # target_vec = mz.Maze.tile2pixelctr(Vector(*self.target))
-        # target_pt = (target_vec.x, target_vec.y)
-        # target_rect = pg.Rect((0, 0), (24, 24))
-        # target_rect.center = target_pt
-        # self.maze.blit_relative(self.debug_draw_rect, target_rect)
+        target_vec = mz.Maze.tile2pixelctr(Vector(*self.target))
+        target_pt = (target_vec.x, target_vec.y)
+        target_rect = pg.Rect((0, 0), (24, 24))
+        target_rect.center = target_pt
+        self.maze.blit_relative(self.debug_draw_rect, target_rect)
 
     def update_mode(self):
         if self.mode == GhostMode.EATEN_INVISIBLE: self.mode = GhostMode.EATEN
@@ -277,37 +233,35 @@ class Blinky(Ghost):
         super().__init__(type='reds', tile_start=(18, 10), tile_scatter=(25, -4), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
-        self.target = self.pacman.tile
+        self.target = get_target_tile_blinky(self.pacman.tile)
 
 class Pinky(Ghost):
     def __init__(self, maze, pacman, play):
         super().__init__(type='pinks', tile_start=(8, 11), tile_scatter=(2, -4), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
-        vec_facing = DIR_VECTOR[self.pacman.facing]
-        tile_pac = list(self.pacman.tile)
-        for i in range(2):
-            tile_pac[i] += 4*vec_facing[i]
-        self.target = tuple(tile_pac)
+        self.target = get_target_tile_pinky(
+            player_tile=self.pacman.tile,
+            player_facing=self.pacman.facing
+        )
 
 class Inky(Ghost):
     def __init__(self, maze, pacman, play):
         super().__init__(type='blues', tile_start=(18, 14), tile_scatter=(27, 31), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
-        pivot = self.play.player.tile
-        vec_diff = Vector(*pivot) - Vector(*self.play.ghosts.sprites()[0].tile)
-        vec_diff.setidx(1, vec_diff.y*-1)
-        self.target = (pivot[0] + vec_diff.x, pivot[1] + vec_diff.y)
+        self.target = get_target_tile_inky(
+            player_tile=self.pacman.tile,
+            blinky_tile=self.play.ghosts.sprites()[0].tile
+        )
 
 class Clyde(Ghost):
     def __init__(self, maze, pacman, play):
         super().__init__(type='oranges', tile_start=(9, 14), tile_scatter=(0, 31), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
-        tile_player = self.play.player.tile
-        d = Vector.distance_squared(Vector(*self.tile), Vector(*tile_player))
-        if d < 64:
-            self.target = self.tile_scatter
-        else:
-            self.target = tile_player
+        self.target = get_target_tile_clyde(
+            player_tile=self.pacman.tile,
+            clyde_tile=self.tile,
+            scatter_target_tile=self.tile_scatter
+        )
