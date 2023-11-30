@@ -8,9 +8,8 @@ from util import *
 from timer import Timer, TimerDict, TimerDual
 import maze as mz
 import application as app
-import play as pl
 import ghost as gh
-
+import player_ai.player_ai as ai
  
 class Player(Sprite):
     """Class for the Player, handling Pac Man's controls, movement, and other operations."""
@@ -165,6 +164,8 @@ class Player(Sprite):
             self.tile_progress %= 1
             self.tile = [self.tile_next[0], self.tile_next[1]]
             self.maze.consume_tile(self.tile)
+            # TODO: AI to set facing direction
+            ai.next_move(self.play)
             self.update_tile_next()
             self.update_facing()
         self.update_rect()

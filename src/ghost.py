@@ -20,8 +20,9 @@ class Ghost(Sprite):
     FRIGHTENED_SPEED = 3
     EATEN_SPEED = 20
 
-    def __init__(self, type, tile_start, tile_scatter, maze, pacman, play):
+    def __init__(self, name, type, tile_start, tile_scatter, maze, pacman, play):
         super().__init__()
+        self.name = name
         self.pacman = pacman
         self.maze = maze
         self.play = play
@@ -230,14 +231,14 @@ class Ghost(Sprite):
 
 class Blinky(Ghost):
     def __init__(self, maze, pacman, play):
-        super().__init__(type='reds', tile_start=(18, 10), tile_scatter=(25, -4), maze=maze, pacman=pacman, play=play)
+        super().__init__(name='Blinky', type='reds', tile_start=(18, 10), tile_scatter=(25, -4), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
         self.target = get_target_tile_blinky(self.pacman.tile)
 
 class Pinky(Ghost):
     def __init__(self, maze, pacman, play):
-        super().__init__(type='pinks', tile_start=(8, 11), tile_scatter=(2, -4), maze=maze, pacman=pacman, play=play)
+        super().__init__(name='Pinky', type='pinks', tile_start=(8, 11), tile_scatter=(2, -4), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
         self.target = get_target_tile_pinky(
@@ -247,7 +248,7 @@ class Pinky(Ghost):
 
 class Inky(Ghost):
     def __init__(self, maze, pacman, play):
-        super().__init__(type='blues', tile_start=(18, 14), tile_scatter=(27, 31), maze=maze, pacman=pacman, play=play)
+        super().__init__(name='Inky', type='blues', tile_start=(18, 14), tile_scatter=(27, 31), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
         self.target = get_target_tile_inky(
@@ -257,7 +258,7 @@ class Inky(Ghost):
 
 class Clyde(Ghost):
     def __init__(self, maze, pacman, play):
-        super().__init__(type='oranges', tile_start=(9, 14), tile_scatter=(0, 31), maze=maze, pacman=pacman, play=play)
+        super().__init__(name='Clyde', type='oranges', tile_start=(9, 14), tile_scatter=(0, 31), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
         self.target = get_target_tile_clyde(

@@ -131,9 +131,9 @@ class Maze(Sprite):
         strpos = Maze.tile2strpos(tile_vec)
         return int(self.maze[strpos])
     
-    def consume_tile(self, tile_vec: tuple[int, int]):
+    def consume_tile(self, tile: tuple[int, int]):
         """Change tile state at `tile_vec`, set other game states."""
-        vec = Vector(*tile_vec)
+        vec = Vector(*tile)
         state = self.get_tile_state(vec)
         strpos = Maze.tile2strpos(vec)
 
