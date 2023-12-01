@@ -4,11 +4,20 @@ import ghost_ai
 import play as pl
 from .model import *
 
+def step(state: MState, direction: str) -> MState:
+	"""
+	Simulate one step of the game, where Pac Man moves to a tile.
+	This assumes that Pac Man must ALWAYS move.
+
+	If the tile Pac Man is moving to is not traversable, return None.
+	"""
+
+
 def state_explore(state: MState) -> list[MState]:
 	"""
 	Return dict[str, State] of next possible states (children tree nodes).
 	Key is direction.
-	Explores ONE layer/step.
+	Explores ONE layer/step in each valid direction.
 	"""
 	# Recommendation: use deepcopy() to make children states based on parent
 	
