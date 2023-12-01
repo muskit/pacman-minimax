@@ -4,16 +4,7 @@ from vector import Vector
 
 from ghost import Ghost
 from maze import Maze
-
-class MGhost:
-	def __init__(self, ghost: Ghost):
-		self.name = ghost.name
-		self.tile = ghost.tile
-		self.facing = ghost.facing
-	
-	def step(self):
-		"""Simulate the ghost taking its next step"""
-
+import ghost_ai as g_ai
 
 class MMaze:
 	def __init__(self, cur_maze: list[str]):
@@ -34,11 +25,7 @@ class MMaze:
 		state = self.get_tile_state(vec)
 		strpos = Maze.tile2strpos(vec)
 
-		if state in [-1, 0]: # (eating inaccessible tile)
-			pass
-		elif state == 1: # blank tile
-			pass
-		elif state == 2: # food pellet
+		if state == 2: # food pellet
 			self.maze[strpos] = '1'
 			# self.remaining_pellets -= 1
 		elif state == 3: # power pellet
@@ -47,15 +34,37 @@ class MMaze:
 		elif state == 5: # bonus fruit 
 			self.maze[strpos] = '1'
 
-class State:
+class MGhost:
+	def __init__(self, ghost: Ghost):
+		self.name = ghost.name
+		self.tile = ghost.tile
+		self.facing = ghost.facing
+	
+	def step(self, player_tile: tuple[int, int], maze: MMaze):
+		"""Simulate the ghost taking its next step"""
+		match self.name:
+			case "Blinky":
+				pass
+			case "Pinky":
+				pass
+			case "Inky":
+				pass
+			case "Clyde":
+				pass
+
+class MState:
 	def __init__(self,
 		player_tile: tuple[int, int],
 		maze: list[str],
-		ghosts: list[Ghost]
+		ghosts: list[Ghost],
+		remaining_pellets: int
 	):
 		"""Construct an AI-model state from existing game state."""
 		self.tile = player_tile
 		self.maze = MMaze(maze)
-		self.ghosts: list[MGhost] = []
+		self.ghosts: dict[MGhost] = {}
 		for g in ghosts:
-			self.ghosts.append(MGhost(g))
+			self.ghosts[g.name] = MGhost(g)
+		# Note: lower remaining_pellets is better for player!
+		self.remaining_pellets = remaining_pellets
+		self.terminal = False # TODO: determine if state is terminal

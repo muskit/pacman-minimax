@@ -1,6 +1,5 @@
 import os
 import pygame as pg
-import play
 from menu import Menu
 
 class Application: # is this class like the game class in space invaders ?

@@ -52,6 +52,7 @@ class Maze(Sprite):
     TILE_SIZE = 24 # 24x24px square
     PORTAL_A_TILE = (1, 14)
     PORTAL_B_TILE = (26, 14)
+    NUM_PELLETS = 244
 
     @staticmethod
     def pixel2tile(px_vec: Vector):
@@ -82,7 +83,7 @@ class Maze(Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = numpy.subtract(self.surface.get_rect().center, self.rect.center)
 
-        self.remaining_pellets = 244
+        self.remaining_pellets = Maze.NUM_PELLETS
         """Pellets left to eat before moving to the next level."""
 
         # edible sprites

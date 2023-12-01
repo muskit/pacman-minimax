@@ -34,8 +34,6 @@ class Play:
         self.game_over_text_rect = self.ready_text.get_rect()
         self.game_over_text_rect.center = (24*12.5, 24*6)
 
-        self.food_pellets = 170
-
         self.player_speed = 7
         """The player's movement speed, in tiles per second."""
 
