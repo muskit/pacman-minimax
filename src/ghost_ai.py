@@ -65,7 +65,7 @@ def get_next_move_tile(
 	target_tile: tuple[int, int],
 	maze,
 	facing: str,
-	cur_mode: GhostMode
+	cur_mode: GhostMode = GhostMode.CHASE
 ):
 	opposite_dir = OPPOSITE_DIR[facing]
 	opposite_tile =\

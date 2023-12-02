@@ -164,7 +164,7 @@ class Player(Sprite):
             self.tile_progress %= 1
             self.tile = [self.tile_next[0], self.tile_next[1]]
             self.maze.consume_tile(self.tile)
-            # TODO: AI to set facing direction
+            # TODO: AI control
             ai.next_move(self.play)
             self.update_tile_next()
             self.update_facing()

@@ -123,11 +123,7 @@ class Ghost(Sprite):
     
     def update_facing(self):
         """Update `self.facing` based on `self.tile` and `self.tile_next`."""
-        diff = (self.tile_next[0] - self.tile[0], self.tile_next[1] - self.tile[1])
-        if diff[0] != 0: # horizontal movement
-            self.facing = 'left' if diff[0] < 0 else 'right'
-        else: # vertical movement
-            self.facing = 'down' if diff[1] > 0 else 'up'
+        self.facing = get_facing(self.tile, self.tile_next)
 
     def move(self):
         """Calculate target tile (if needed) and move towards it.
