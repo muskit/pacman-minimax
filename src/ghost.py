@@ -20,7 +20,15 @@ class Ghost(Sprite):
     FRIGHTENED_SPEED = 3
     EATEN_SPEED = 20
 
-    def __init__(self, name, type, tile_start, tile_scatter, maze, pacman, play):
+    def __init__(
+        self,
+        name: str,
+        color: tuple[int, int, int],
+        type: str,
+        tile_start: tuple[int, int],
+        tile_scatter: tuple[int, int],
+        maze, pacman, play
+    ):
         super().__init__()
         self.name = name
         self.pacman = pacman
@@ -54,7 +62,7 @@ class Ghost(Sprite):
         """The ghost's current behavior mode. Refer to the `GhostMode` enum."""
 
         self.debug_draw_rect = pg.surface.Surface(size=(24, 24))
-        self.debug_draw_rect.fill((255, 0, 0))
+        self.debug_draw_rect.fill(color)
 
         ## SPRITES ##
         normal_sprites = {
@@ -95,6 +103,7 @@ class Ghost(Sprite):
         self.tile_next = None
         self.tile_progress = 1
         self.facing = 'right'
+        self.target = self.tile_scatter
         self.update_next_tile()
         self.update_facing()
         self.update_rect()
@@ -227,14 +236,14 @@ class Ghost(Sprite):
 
 class Blinky(Ghost):
     def __init__(self, maze, pacman, play):
-        super().__init__(name='Blinky', type='reds', tile_start=(18, 10), tile_scatter=(25, -4), maze=maze, pacman=pacman, play=play)
+        super().__init__(name='Blinky', color=(255, 0, 0), type='reds', tile_start=(18, 10), tile_scatter=(25, -4), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
         self.target = get_target_tile_blinky(self.pacman.tile)
 
 class Pinky(Ghost):
     def __init__(self, maze, pacman, play):
-        super().__init__(name='Pinky', type='pinks', tile_start=(8, 11), tile_scatter=(2, -4), maze=maze, pacman=pacman, play=play)
+        super().__init__(name='Pinky', color=(255, 183, 255), type='pinks', tile_start=(8, 11), tile_scatter=(2, -4), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
         self.target = get_target_tile_pinky(
@@ -244,7 +253,7 @@ class Pinky(Ghost):
 
 class Inky(Ghost):
     def __init__(self, maze, pacman, play):
-        super().__init__(name='Inky', type='blues', tile_start=(18, 14), tile_scatter=(27, 31), maze=maze, pacman=pacman, play=play)
+        super().__init__(name='Inky', color=(0, 255, 255), type='blues', tile_start=(18, 14), tile_scatter=(27, 31), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
         self.target = get_target_tile_inky(
@@ -254,7 +263,7 @@ class Inky(Ghost):
 
 class Clyde(Ghost):
     def __init__(self, maze, pacman, play):
-        super().__init__(name='Clyde', type='oranges', tile_start=(9, 14), tile_scatter=(0, 31), maze=maze, pacman=pacman, play=play)
+        super().__init__(name='Clyde', color=(255, 183, 81), type='oranges', tile_start=(9, 14), tile_scatter=(0, 31), maze=maze, pacman=pacman, play=play)
     
     def update_chase_target(self):
         self.target = get_target_tile_clyde(

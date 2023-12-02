@@ -47,10 +47,10 @@ def explore_states(state: MState) -> list[MState]:
 	Explores ONE layer/step in each valid direction.
 	"""
 	ret = {}
-	for dir in ['up', 'down', 'left', 'right']:
-		state = step(state, dir)
-		if state != None:
-			ret[dir] = state
+	for direction in ['up', 'down', 'left', 'right']:
+		cur_state = step(state, direction)
+		if cur_state != None:
+			ret[direction] = cur_state
 	
 	return ret
 
@@ -78,9 +78,8 @@ def next_move(
 	"""
 
 	# TESTING FUNCTIONS
-	mplayer = MPlayer(play.player.tile, play.player.facing)
 	st = MState(
-		player=mplayer,
+		player=MPlayer(play.player.tile, play.player.facing),
 		maze=play.maze.maze,
 		ghosts=play.ghosts,
 		remaining_pellets=play.maze.remaining_pellets
