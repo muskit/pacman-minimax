@@ -3,6 +3,7 @@ from copy import deepcopy
 from ghost_ai import *
 import play as pl
 from .model import *
+import math
 
 def step(state: MState, direction: str) -> MState:
 	"""
@@ -40,7 +41,7 @@ def step(state: MState, direction: str) -> MState:
 	return ret
 
 
-def explore_states(state: MState) -> list[MState]:
+def explore_states(state: MState) -> dict[str, MState]:
 	"""
 	Return dict[str, State] of next possible states (children tree nodes).
 	Key is direction.
@@ -55,7 +56,7 @@ def explore_states(state: MState) -> list[MState]:
 	return ret
 
 
-def evaluate(state: MState) -> int:
+def evaluate(move: str, state: MState) -> int:
 	"""
 	Return utility score for state.
 	
@@ -64,6 +65,48 @@ def evaluate(state: MState) -> int:
 	-∞ for death state
 	+∞ if state results in last pellet eaten (WIN!)
 	"""
+	player_state = state.player
+	x1, y1 = player_state.tile
+	state_value = 0
+	next_state_move = {
+		'left': (-1 , 0),
+		'right': (1 , 0),
+		'up': (0, -1),
+		'down': (0, 1),
+	}
+
+	next_tile = tuple(map(sum, zip(player_state.tile, next_state_move[move])))
+	next_tile_state = state.maze.get_tile_state(Vector(*next_tile))
+	# Checks what the following tile will be
+	if next_tile_state == 2:
+		state_value = state_value + 1
+	elif next_tile_state == 3:
+		state_value = state_value + 2
+	elif next_tile_state == 5:
+		state_value = state_value + 3
+
+	# print(f'player tile: {player_state.tile}\n')
+	# Check player position from the ghosts position
+	for g in state.ghosts.values():
+		x2, y2 = g.tile
+		# print(f'{g.name} tile: {g.tile} status\n')
+
+		distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+		if distance == 1:
+			state_value = state_value - 3
+		elif distance == 2:
+			state_value = state_value - 2
+		elif distance > 4:
+			state_value = state_value + 3	
+		else:
+			state_value = state_value + 1
+
+
+
+	return state_value
+
+
 
 def minimax(remaining_depth: int):
 	"""Recursive minimax function."""
@@ -84,5 +127,19 @@ def next_move(
 		ghosts=play.ghosts,
 		remaining_pellets=play.maze.remaining_pellets
 	)
-	print(f'{st}\n')
-	explore_states(st)
+	# print(f'{st}\n')
+	possible_states = explore_states(st)
+
+	state_values = {
+		'left': 0,
+		'right': 0,
+		'up': 0,
+		'down': 0,
+	}
+
+	print("NEXT STATE")
+	for move, state in possible_states.items():
+		print(f"\nYIPPIE {move}")
+		state_values[move] = evaluate(move, state)
+
+	print("state vlues", state_values)
