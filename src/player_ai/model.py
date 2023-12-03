@@ -9,10 +9,11 @@ from maze import Maze
 from ghost_ai import *
 
 class MMaze:
-	def __init__(self, cur_maze: list[str], remaining_pellets: int):
+	def __init__(self, cur_maze: list[str], remaining_pellets: int, consumed_tile: int = None):
 		# how much left to eat -- lower is better
 		self.remaining_pellets = remaining_pellets
 		self.maze = deepcopy(cur_maze)
+		self.consumed_tile = consumed_tile
 
 	def get_tile_state(self, tile_vec: Vector):
 		"""Refer to `Maze.get_tile_state`"""
@@ -22,23 +23,20 @@ class MMaze:
 		strpos = Maze.tile2strpos(tile_vec)
 		return int(self.maze[strpos])
 
-	def consume_tile(self, tile: tuple[int, int], alter_maze=False):
+	def consume_tile(self, tile: tuple[int, int]):
 		"""Change tile state at `tile_vec`."""
 		vec = Vector(*tile)
-		state = self.get_tile_state(vec)
+		self.consumed_tile = self.get_tile_state(vec)
 		strpos = Maze.tile2strpos(vec)
 
-		if state == 2: # food pellet
+		if self.consumed_tile == 2: # food pellet
 			self.remaining_pellets -= 1
-			if alter_maze:
-				self.maze[strpos] = '1'
-		elif state == 3: # power pellet
+			self.maze[strpos] = '1'
+		elif self.consumed_tile == 3: # power pellet
 			self.remaining_pellets -= 1
-			if alter_maze:
-				self.maze[strpos] = '1'
-		elif state == 5: # bonus fruit 
-			if alter_maze:
-				self.maze[strpos] = '1'
+			self.maze[strpos] = '1'
+		elif self.consumed_tile == 5: # bonus fruit 
+			self.maze[strpos] = '1'
 
 class MPlayer:
 	def __init__(self, tile: tuple[int, int], facing: str):
@@ -107,8 +105,8 @@ class MState:
 			self.ghosts[g.name] = MGhost(g)
 		self.terminal = False # TODO: determine if state is terminal
 
-	def consume_current_tile(self, alter_maze = False):
-		self.maze.consume_tile(self.player.tile, alter_maze)
+	def consume_current_tile(self):
+		self.maze.consume_tile(self.player.tile)
 	
 	def __repr__(self):
 		maze = deepcopy(self.maze.maze)

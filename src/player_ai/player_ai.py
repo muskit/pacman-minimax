@@ -4,7 +4,7 @@ from ghost_ai import *
 import play as pl
 from .model import *
 
-def step(state: MState, direction: str, alter_maze=False) -> MState:
+def step(state: MState, direction: str) -> MState:
 	"""
 	Copies the state and simulates one step of the game, in which
 	Pac Man moves to a tile.
@@ -27,7 +27,7 @@ def step(state: MState, direction: str, alter_maze=False) -> MState:
 
 	# move pac man, consume tile
 	ret.player.tile = dest_tile
-	ret.consume_current_tile(alter_maze)
+	ret.consume_current_tile()
 
 	# ghosts
 	for g in ret.ghosts.values():
