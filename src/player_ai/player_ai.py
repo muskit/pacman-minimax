@@ -56,7 +56,7 @@ def explore_states(state: MState) -> dict[str, MState]:
 	return ret
 
 
-def evaluate(move: str, state: MState) -> int:
+def evaluate(state: MState) -> int:
 	"""
 	Return utility score for state.
 	
@@ -68,15 +68,10 @@ def evaluate(move: str, state: MState) -> int:
 	player_state = state.player
 	x1, y1 = player_state.tile
 	state_value = 0
-	next_state_move = {
-		'left': (-1 , 0),
-		'right': (1 , 0),
-		'up': (0, -1),
-		'down': (0, 1),
-	}
 
-	next_tile = tuple(map(sum, zip(player_state.tile, next_state_move[move])))
-	next_tile_state = state.maze.get_tile_state(Vector(*next_tile))
+	# next_tile = tuple(map(sum, zip(player_state.tile, next_state_move[move])))
+	next_tile_state = state.maze.consumed_tile
+	# print(next_tile_state)
 	# Checks what the following tile will be
 	if next_tile_state == 2:
 		state_value = state_value + 1
@@ -97,10 +92,10 @@ def evaluate(move: str, state: MState) -> int:
 			state_value = state_value - 3
 		elif distance == 2:
 			state_value = state_value - 2
-		elif distance > 4:
-			state_value = state_value + 3	
-		else:
-			state_value = state_value + 1
+	# 	elif distance > 4:
+	# 		state_value = state_value + 3	
+	# 	else:
+	# 		state_value = state_value + 1
 
 
 
@@ -127,19 +122,18 @@ def next_move(
 		ghosts=play.ghosts,
 		remaining_pellets=play.maze.remaining_pellets
 	)
-	# print(f'{st}\n')
 	possible_states = explore_states(st)
 
 	state_values = {
-		'left': 0,
-		'right': 0,
-		'up': 0,
-		'down': 0,
+		'left': -1,
+		'right': -1,
+		'up': -1,
+		'down': -1,
 	}
 
 	print("NEXT STATE")
 	for move, state in possible_states.items():
 		print(f"\nYIPPIE {move}")
-		state_values[move] = evaluate(move, state)
+		state_values[move] = evaluate(state)
 
-	print("state vlues", state_values)
+	print("state values", state_values)
