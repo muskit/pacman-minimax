@@ -120,8 +120,8 @@ class Play:
                     self.phase = 3
                     continue
                 if not self.play_state.is_action_pausing:
-                    self.ghosts.update()
                     self.player.update()
+                    self.ghosts.update()
                     self.collision_check()
 
                 self.maze.draw()
