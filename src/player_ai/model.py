@@ -13,6 +13,8 @@ class MMaze:
 		# how much left to eat -- lower is better
 		self.remaining_pellets = remaining_pellets
 		self.maze = deepcopy(cur_maze)
+		
+		# WARNING: only correct if consume_tile was called at active tile ONCE prior to read!
 		self.consumed_tile = consumed_tile
 
 	def get_tile_state(self, tile_vec: Vector):
