@@ -10,10 +10,13 @@ def step(state: MState, direction: str) -> MState:
 	Pac Man moves to a tile.
 	This assumes that Pac Man must ALWAYS move.
 
-	If the tile Pac Man is moving to is not traversable or it's a
-	terminal state, return None.
+	If the tile Pac Man is moving to is not traversable,
+	return None.
+
+	If the state is already terminal, return the same state, since
+	nothing else can happen.
 	"""
-	if state.terminal: return None
+	if state.is_terminal(): return state
 
 	dest_tile =\
 		(state.player.tile[0] + DIR_VECTOR[direction][0],
@@ -40,7 +43,7 @@ def step(state: MState, direction: str) -> MState:
 	return ret
 
 
-def explore_states(state: MState) -> list[MState]:
+def explore_states(state: MState) -> dict[str, MState]:
 	"""
 	Return dict[str, State] of next possible states (children tree nodes).
 	Key is direction.
@@ -61,12 +64,25 @@ def evaluate(state: MState) -> int:
 	
 	Higher values are desirable.
 
-	-∞ for death state
+	-∞ for death state,
 	+∞ if state results in last pellet eaten (WIN!)
 	"""
 
-def minimax(remaining_depth: int):
-	"""Recursive minimax function."""
+def minimax(state: MState, depth: int = 1) -> int:
+	"""
+	Recursive minimax function. Explores more states based on depth
+	and returns an eval score.
+	"""
+
+	if depth <= 1 or state.is_terminal():
+		return evaluate(state)
+	
+	value = -float('inf')
+	for v in explore_states(state).values():
+		value = max(minimax(v, depth-1), value)
+
+	return value
+
 
 def next_move(
 	play,
@@ -77,12 +93,17 @@ def next_move(
 	Returns one of "up", "down", "left", or "right"
 	"""
 
-	# TESTING FUNCTIONS
 	st = MState(
 		player=MPlayer(play.player.tile, play.player.facing),
 		maze=play.maze.maze,
 		ghosts=play.ghosts,
 		remaining_pellets=play.maze.remaining_pellets
 	)
-	print(f'{st}\n')
-	explore_states(st)
+	best = (-float('inf'), None) # (score: int, direction: str)
+	for k, v in explore_states(st).items():
+		scr = minimax(v, depth)
+		if scr > best[0]:
+			best = (scr, k)
+	
+	print(best[1])
+	return best[1]

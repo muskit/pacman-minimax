@@ -31,10 +31,7 @@ class MMaze:
 		self.consumed_tile = self.get_tile_state(vec)
 		strpos = Maze.tile2strpos(vec)
 
-		if self.consumed_tile == 2: # food pellet
-			self.remaining_pellets -= 1
-			self.maze[strpos] = '1'
-		elif self.consumed_tile == 3: # power pellet
+		if self.consumed_tile in [2, 3]: # food/power pellet
 			self.remaining_pellets -= 1
 			self.maze[strpos] = '1'
 		elif self.consumed_tile == 5: # bonus fruit 
@@ -105,7 +102,16 @@ class MState:
 		self.ghosts: dict[str, MGhost] = {}
 		for g in ghosts:
 			self.ghosts[g.name] = MGhost(g)
-		self.terminal = False # TODO: determine if state is terminal
+
+	def is_terminal(self):
+		if self.maze.remaining_pellets == 0:
+			return True
+
+		for g in self.ghosts.values():
+			if g.tile == self.player.tile:
+				return True
+			
+		return False
 
 	def consume_current_tile(self):
 		self.maze.consume_tile(self.player.tile)
