@@ -119,6 +119,6 @@ class MState:
 				char = maze[Maze.WIDTH*y + x]
 				char = " " if char == "1" else char
 				char = "." if char == "2" else char
-				ret += char
+				ret += f' {char} '
 			ret += '\n'
 		return ret
