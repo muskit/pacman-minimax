@@ -56,7 +56,7 @@ def explore_states(state: MState) -> dict[str, MState]:
 	return ret
 
 
-def evaluate(state: MState) -> int:
+def evaluate(move: str, state: MState) -> int:
 	"""
 	Return utility score for state.
 	
