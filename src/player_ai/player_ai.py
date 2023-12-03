@@ -76,31 +76,38 @@ def evaluate(state: MState) -> int:
 	next_tile_state = state.maze.consumed_tile
 	# print(next_tile_state)
 	# Checks what the following tile will be
-	if next_tile_state == 2:
+	if next_tile_state == 1:
 		state_value = state_value + 1
-	elif next_tile_state == 3:
-		state_value = state_value + 2
-	elif next_tile_state == 5:
+	elif next_tile_state == 2:
 		state_value = state_value + 3
+	elif next_tile_state == 3:
+		state_value = state_value + 5
+	elif next_tile_state == 5:
+		state_value = state_value + 8
 
 	# print(f'player tile: {player_state.tile}\n')
 	# Check player position from the ghosts position
+	nearest_ghost_position = 100
 	for g in state.ghosts.values():
 		x2, y2 = g.tile
-		# print(f'{g.name} tile: {g.tile} status\n')
-
+		
 		distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+		if distance < nearest_ghost_position:
+			nearest_ghost_position = distance
+			
+	# 	print(f"{g.name} distance from pacman is {distance}")
 
-		if distance == 1:
-			state_value = state_value - 3
-		elif distance == 2:
-			state_value = state_value - 2
-	# 	elif distance > 4:
-	# 		state_value = state_value + 3	
-	# 	else:
-	# 		state_value = state_value + 1
+	# print(f"nearestghost distance from pacman is {nearest_ghost_position}")
+	if nearest_ghost_position >= 7:
+		state_value = state_value + 0
+	elif nearest_ghost_position >= 4:
+		state_value = state_value - 10
+	elif nearest_ghost_position >= 2:
+		state_value = state_value - 15
+	else:
+		state_value = state_value - 20
 
-
+	print(f"state {state_value}")
 
 	return state_value
 
