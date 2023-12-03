@@ -22,20 +22,23 @@ class MMaze:
 		strpos = Maze.tile2strpos(tile_vec)
 		return int(self.maze[strpos])
 
-	def consume_tile(self, tile: tuple[int, int]):
+	def consume_tile(self, tile: tuple[int, int], alter_maze=False):
 		"""Change tile state at `tile_vec`."""
 		vec = Vector(*tile)
 		state = self.get_tile_state(vec)
 		strpos = Maze.tile2strpos(vec)
 
 		if state == 2: # food pellet
-			self.maze[strpos] = '1'
 			self.remaining_pellets -= 1
+			if alter_maze:
+				self.maze[strpos] = '1'
 		elif state == 3: # power pellet
-			self.maze[strpos] = '1'
 			self.remaining_pellets -= 1
+			if alter_maze:
+				self.maze[strpos] = '1'
 		elif state == 5: # bonus fruit 
-			self.maze[strpos] = '1'
+			if alter_maze:
+				self.maze[strpos] = '1'
 
 class MPlayer:
 	def __init__(self, tile: tuple[int, int], facing: str):
@@ -104,8 +107,8 @@ class MState:
 			self.ghosts[g.name] = MGhost(g)
 		self.terminal = False # TODO: determine if state is terminal
 
-	def consume_current_tile(self):
-		self.maze.consume_tile(self.player.tile)
+	def consume_current_tile(self, alter_maze = False):
+		self.maze.consume_tile(self.player.tile, alter_maze)
 	
 	def __repr__(self):
 		maze = deepcopy(self.maze.maze)

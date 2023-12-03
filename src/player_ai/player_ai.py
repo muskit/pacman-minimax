@@ -4,7 +4,7 @@ from ghost_ai import *
 import play as pl
 from .model import *
 
-def step(state: MState, direction: str) -> MState:
+def step(state: MState, direction: str, alter_maze=False) -> MState:
 	"""
 	Copies the state and simulates one step of the game, in which
 	Pac Man moves to a tile.
@@ -27,7 +27,7 @@ def step(state: MState, direction: str) -> MState:
 
 	# move pac man, consume tile
 	ret.player.tile = dest_tile
-	ret.consume_current_tile()
+	ret.consume_current_tile(alter_maze)
 
 	# ghosts
 	for g in ret.ghosts.values():
@@ -65,7 +65,7 @@ def evaluate(state: MState) -> int:
 	+∞ if state results in last pellet eaten (WIN!)
 	"""
 
-def minimax():
+def minimax(remaining_depth: int):
 	"""Recursive minimax function."""
 
 def next_move(
