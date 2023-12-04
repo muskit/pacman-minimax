@@ -42,14 +42,6 @@ class MMaze:
 			self.maze[strpos] = '1'
 		elif self.consumed_tile == 5: # bonus fruit 
 			self.maze[strpos] = '1'
-	
-	def get_stepping_dist(self, a: tuple[int, int], b: tuple[int, int]):
-		dist = 0
-		cur_tile = a
-		while tuple(cur_tile) != b:
-			cur_tile = get_next_move_tile(cur_tile, b, self)
-			dist += 1
-		return dist
 
 class MPlayer:
 	def __init__(self, tile: tuple[int, int], facing: str):

@@ -64,15 +64,14 @@ def get_next_move_tile(
 	from_tile: tuple[int, int],
 	target_tile: tuple[int, int],
 	maze,
-	facing: str = None,
+	facing: str,
 	cur_mode: GhostMode = GhostMode.CHASE
 ):
 	candidate_dirs = ['up', 'left', 'down', 'right']
-	if facing != None:
-		opposite_dir = OPPOSITE_DIR[facing]
-		opposite_tile =\
-			(from_tile[0]+DIR_VECTOR[opposite_dir][0], from_tile[1]+DIR_VECTOR[opposite_dir][1])
-		candidate_dirs.remove(opposite_dir)
+	opposite_dir = OPPOSITE_DIR[facing]
+	opposite_tile =\
+		(from_tile[0]+DIR_VECTOR[opposite_dir][0], from_tile[1]+DIR_VECTOR[opposite_dir][1])
+	candidate_dirs.remove(opposite_dir)
 	candidate_tiles = {}
 	dist = {}
 

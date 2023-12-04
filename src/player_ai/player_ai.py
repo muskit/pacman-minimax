@@ -1,9 +1,14 @@
 from copy import deepcopy
+import math
+import numpy as np
 
 from ghost_ai import *
 import play as pl
 from .model import *
-import math
+
+def manhattan_dist(a: tuple[int, int], b: tuple[int, int]):
+	ret = np.sum(np.abs(np.array(a), np.array(b)))
+	return ret
 
 def step(state: MState, direction: str) -> MState:
 	"""
@@ -77,8 +82,8 @@ def evaluate(state: MState) -> int:
 		case TerminalState.WIN:
 			return float('inf')
 
-	player_state = state.player
-	x1, y1 = player_state.tile
+	player = state.player
+	x1, y1 = player.tile
 	state_value = 0
 
 	# next_tile = tuple(map(sum, zip(player_state.tile, next_state_move[move])))
@@ -114,25 +119,28 @@ def evaluate(state: MState) -> int:
 	# print(f"nearest ghost: {nearest_ghost_dist}")
 	ghost_scr = 0
 	if nearest_ghost_dist <= 2:
-		ghost_scr -= 50
-	elif nearest_ghost_dist <= 6:
+		ghost_scr -=  200 * (2 - nearest_ghost_dist)
+	elif nearest_ghost_dist <= 7:
 		ghost_scr -= 2 * (12 - nearest_ghost_dist)
 	print(f'ghost_scr: {ghost_scr}')
 	state_value += ghost_scr
 
 	# nearest pellet
 	break_flag = False
+	nearest_pellet_dist = float('inf')
 	for i in range(1, 100):
 		for y in range(-i, i):
 			for x in range(-i, i):
 				if state.maze.get_tile_state(Vector(x1+x, y1+y)) in [2,3]:
-					pellet_scr = int(100-i)
-					print(f'pellet_scr: {pellet_scr}')
-					state_value += pellet_scr
+					nearest_pellet_dist =\
+						min(manhattan_dist((x, y), player.tile), nearest_pellet_dist)
 					break_flag = True
 					break
-			if break_flag: break
 		if break_flag: break
+
+	pellet_scr = -nearest_pellet_dist
+	print(f'pellet_scr: {pellet_scr}')
+	state_value += pellet_scr
 				
 	# nearest power pellet
 	# break_flag = False
@@ -182,9 +190,13 @@ def next_move(
 		ghosts=play.ghosts,
 		remaining_pellets=play.maze.remaining_pellets
 	)
+	opposite_dir = OPPOSITE_DIR[play.player.facing]
+
 	best = (-float('inf'), None) # (score: int, direction: str)
 	for k, v in explore_states(st).items():
 		scr = minimax(v, depth)
+		if k == opposite_dir:
+			scr -= abs(scr)/10
 		print(f'{k}={scr}\n')
 		if scr > best[0]:
 			best = (scr, k)
