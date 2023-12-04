@@ -38,7 +38,7 @@ def step(state: MState, direction: str) -> MState:
 	ret.player.tile = dest_tile
 	ret.consume_current_tile()
 
-	if ret.terminal(): return ret
+	if ret.terminal() == TerminalState.DEAD: return ret
 
 	# ghosts
 	for g in ret.ghosts.values():
@@ -97,23 +97,23 @@ def evaluate(state: MState) -> int:
 	# Check player position from the ghosts position
 	nearest_ghost_dist = float('inf')
 	for g in state.ghosts.values():
-		if g.state != GhostMode.CHASE: continue
+		if g.state not in [GhostMode.CHASE, GhostMode.SCATTER]: continue
 
 		x2, y2 = g.tile
 		
-		distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-		if distance < nearest_ghost_dist:
-			nearest_ghost_dist = distance
+		dist_squared = (x2 - x1)**2 + (y2 - y1)**2
+		nearest_ghost_dist = min(dist_squared, nearest_ghost_dist)
 	
-	if nearest_ghost_dist == float('inf'):
-		nearest_ghost_dist = 0
+	if nearest_ghost_dist in [0, float('inf')]:
+		ghost_scr = 0
+	else:
+		ghost_scr = -200/nearest_ghost_dist
 
-	ghost_scr = -(100 - nearest_ghost_dist)
 	print(f'ghost_scr: {ghost_scr}')
 	state_value += ghost_scr
 
 	# nearest pellet
-	break_flag = False
+	pellet_layer_found = False
 	nearest_pellet_dist = float('inf')
 	for i in range(1, 100):
 		for y in range(-i, i):
@@ -121,9 +121,9 @@ def evaluate(state: MState) -> int:
 				if state.maze.get_tile_state(Vector(x1+x, y1+y)) in [2,3,5]:
 					nearest_pellet_dist =\
 						min(manhattan_dist((x, y), player.tile), nearest_pellet_dist)
-					break_flag = True
+					pellet_layer_found = True
 					break
-		if break_flag: break
+		if pellet_layer_found: break
 
 	pellet_scr = 100 - nearest_pellet_dist
 	print(f'pellet_scr: {pellet_scr}')
@@ -184,14 +184,18 @@ def next_move(
 	opposite_dir = OPPOSITE_DIR[play.player.facing]
 
 	best = (-float('inf'), None) # (score: int, direction: str)
-	for k, v in explore_states(st).items():
+	possible_states = explore_states(st)
+	for k, v in possible_states.items():
 		scr = minimax(v, depth)
 		if k == opposite_dir:
-			scr -= abs(scr)/7
+			scr -= abs(scr)/13
 		print(f'{k}={scr}\n')
 		if scr > best[0]:
 			best = (scr, k)
 	print()
 	
+	if best[1] == None:
+		best = (-float('inf'), random.choice(list(possible_states.keys())))
+
 	print(f'{best[1]}\n')
 	return best[1]
