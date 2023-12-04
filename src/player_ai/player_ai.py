@@ -86,10 +86,7 @@ def evaluate(state: MState) -> int:
 	x1, y1 = player.tile
 	state_value = 0
 
-	# next_tile = tuple(map(sum, zip(player_state.tile, next_state_move[move])))
 	next_tile_state = state.maze.consumed_tile
-	# print(next_tile_state)
-	# Checks what the following tile will be
 	if next_tile_state == 1:
 		state_value = state_value + 1
 	elif next_tile_state == 2:
@@ -99,7 +96,6 @@ def evaluate(state: MState) -> int:
 	elif next_tile_state == 5:
 		state_value = state_value + 8
 
-	# print(f'player tile: {player_state.tile}\n')
 	# Check player position from the ghosts position
 	nearest_ghost_dist = float('inf')
 	for g in state.ghosts.values():
@@ -113,16 +109,13 @@ def evaluate(state: MState) -> int:
 	
 	if nearest_ghost_dist == float('inf'):
 		nearest_ghost_dist = 0
-			
-	# 	print(f"{g.name} distance from pacman is {distance}")
 
-	# print(f"nearest ghost: {nearest_ghost_dist}")
 	ghost_scr = 0
 	if nearest_ghost_dist <= 2:
 		ghost_scr -=  200 * (2 - nearest_ghost_dist)
 	elif nearest_ghost_dist <= 7:
 		ghost_scr -= 2 * (12 - nearest_ghost_dist)
-	print(f'ghost_scr: {ghost_scr}')
+	# print(f'ghost_scr: {ghost_scr}')
 	state_value += ghost_scr
 
 	# nearest pellet
@@ -139,7 +132,7 @@ def evaluate(state: MState) -> int:
 		if break_flag: break
 
 	pellet_scr = -nearest_pellet_dist
-	print(f'pellet_scr: {pellet_scr}')
+	# print(f'pellet_scr: {pellet_scr}')
 	state_value += pellet_scr
 				
 	# nearest power pellet
@@ -163,8 +156,7 @@ def minimax(state: MState, depth: int = 1) -> int:
 	Recursive minimax function. Explores more states based on depth
 	and returns an eval score.
 	"""
-
-	if depth <= 1 or state.terminal():
+	if depth <= 1 or state.terminal() != TerminalState.ALIVE:
 		return evaluate(state)
 	
 	value = -float('inf')
