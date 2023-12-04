@@ -108,11 +108,7 @@ def evaluate(state: MState) -> int:
 	if nearest_ghost_dist == float('inf'):
 		nearest_ghost_dist = 0
 
-	ghost_scr = 0
-	if nearest_ghost_dist <= 4:
-		ghost_scr -=  100 * (5 - nearest_ghost_dist)
-	elif nearest_ghost_dist <= 6:
-		ghost_scr -= 2 * (12 - nearest_ghost_dist)
+	ghost_scr = -(100 - nearest_ghost_dist)
 	print(f'ghost_scr: {ghost_scr}')
 	state_value += ghost_scr
 
@@ -129,9 +125,14 @@ def evaluate(state: MState) -> int:
 					break
 		if break_flag: break
 
-	pellet_scr = -nearest_pellet_dist
+	pellet_scr = 100 - nearest_pellet_dist
 	print(f'pellet_scr: {pellet_scr}')
 	state_value += pellet_scr
+
+	# number of pellets remaining in maze
+	remain_scr = Maze.NUM_PELLETS - state.maze.remaining_pellets
+	print(f'remain_scr: {remain_scr}')
+	state_value += remain_scr
 				
 	# nearest power pellet
 	# break_flag = False
@@ -186,7 +187,7 @@ def next_move(
 	for k, v in explore_states(st).items():
 		scr = minimax(v, depth)
 		if k == opposite_dir:
-			scr -= abs(scr)/10
+			scr -= abs(scr)/7
 		print(f'{k}={scr}\n')
 		if scr > best[0]:
 			best = (scr, k)

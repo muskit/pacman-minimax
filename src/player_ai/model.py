@@ -112,7 +112,8 @@ class MState:
 
 	def terminal(self):
 		for g in self.ghosts.values():
-			if g.tile == self.player.tile:
+			if g.state in [GhostMode.CHASE, GhostMode.SCATTER]\
+				and g.tile == self.player.tile:
 				return TerminalState.DEAD
 
 		if self.maze.remaining_pellets == 0:
