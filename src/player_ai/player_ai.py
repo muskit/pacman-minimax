@@ -87,19 +87,17 @@ def evaluate(state: MState) -> int:
 	state_value = 0
 
 	next_tile_state = state.maze.consumed_tile
-	if next_tile_state == 1:
-		state_value = state_value + 1
-	elif next_tile_state == 2:
+	if next_tile_state == 2:
 		state_value = state_value + 3
 	elif next_tile_state == 3:
-		state_value = state_value + 5
-	elif next_tile_state == 5:
 		state_value = state_value + 8
+	elif next_tile_state == 5:
+		state_value = state_value + 4
 
 	# Check player position from the ghosts position
 	nearest_ghost_dist = float('inf')
 	for g in state.ghosts.values():
-		if g.state == GhostMode.FRIGHTENED: continue
+		if g.state != GhostMode.CHASE: continue
 
 		x2, y2 = g.tile
 		
@@ -111,11 +109,11 @@ def evaluate(state: MState) -> int:
 		nearest_ghost_dist = 0
 
 	ghost_scr = 0
-	if nearest_ghost_dist <= 2:
-		ghost_scr -=  200 * (2 - nearest_ghost_dist)
-	elif nearest_ghost_dist <= 7:
+	if nearest_ghost_dist <= 4:
+		ghost_scr -=  100 * (5 - nearest_ghost_dist)
+	elif nearest_ghost_dist <= 6:
 		ghost_scr -= 2 * (12 - nearest_ghost_dist)
-	# print(f'ghost_scr: {ghost_scr}')
+	print(f'ghost_scr: {ghost_scr}')
 	state_value += ghost_scr
 
 	# nearest pellet
@@ -124,7 +122,7 @@ def evaluate(state: MState) -> int:
 	for i in range(1, 100):
 		for y in range(-i, i):
 			for x in range(-i, i):
-				if state.maze.get_tile_state(Vector(x1+x, y1+y)) in [2,3]:
+				if state.maze.get_tile_state(Vector(x1+x, y1+y)) in [2,3,5]:
 					nearest_pellet_dist =\
 						min(manhattan_dist((x, y), player.tile), nearest_pellet_dist)
 					break_flag = True
@@ -132,7 +130,7 @@ def evaluate(state: MState) -> int:
 		if break_flag: break
 
 	pellet_scr = -nearest_pellet_dist
-	# print(f'pellet_scr: {pellet_scr}')
+	print(f'pellet_scr: {pellet_scr}')
 	state_value += pellet_scr
 				
 	# nearest power pellet
