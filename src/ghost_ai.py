@@ -67,10 +67,10 @@ def get_next_move_tile(
 	facing: str,
 	cur_mode: GhostMode = GhostMode.CHASE
 ):
+	candidate_dirs = ['up', 'left', 'down', 'right']
 	opposite_dir = OPPOSITE_DIR[facing]
 	opposite_tile =\
 		(from_tile[0]+DIR_VECTOR[opposite_dir][0], from_tile[1]+DIR_VECTOR[opposite_dir][1])
-	candidate_dirs = ['up', 'left', 'down', 'right']
 	candidate_dirs.remove(opposite_dir)
 	candidate_tiles = {}
 	dist = {}
