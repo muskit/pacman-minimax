@@ -98,23 +98,55 @@ def evaluate(state: MState) -> int:
 	# Check player position from the ghosts position
 	nearest_ghost_dist = float('inf')
 	for g in state.ghosts.values():
+		if g.state == GhostMode.FRIGHTENED: continue
+
 		x2, y2 = g.tile
 		
 		distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 		if distance < nearest_ghost_dist:
 			nearest_ghost_dist = distance
+	
+	if nearest_ghost_dist == float('inf'):
+		nearest_ghost_dist = 0
 			
 	# 	print(f"{g.name} distance from pacman is {distance}")
 
 	# print(f"nearest ghost: {nearest_ghost_dist}")
-	if nearest_ghost_dist >= 7:
-		state_value += 5
-	elif nearest_ghost_dist >= 4:
-		state_value -= 10
-	elif nearest_ghost_dist >= 2:
-		state_value -= 15
-	else:
-		state_value = state_value - 20
+	ghost_scr = 0
+	if nearest_ghost_dist <= 2:
+		ghost_scr -= 50
+	elif nearest_ghost_dist <= 6:
+		ghost_scr -= 2 * (12 - nearest_ghost_dist)
+	print(f'ghost_scr: {ghost_scr}')
+	state_value += ghost_scr
+
+	# nearest pellet
+	break_flag = False
+	for i in range(1, 100):
+		for y in range(-i, i):
+			for x in range(-i, i):
+				if state.maze.get_tile_state(Vector(x1+x, y1+y)) in [2,3]:
+					pellet_scr = int(100-i)
+					print(f'pellet_scr: {pellet_scr}')
+					state_value += pellet_scr
+					break_flag = True
+					break
+			if break_flag: break
+		if break_flag: break
+				
+	# nearest power pellet
+	# break_flag = False
+	# for i in range(1, 100):
+	# 	for y in range(-i, i):
+	# 		for x in range(-i, i):
+	# 			if state.maze.get_tile_state(Vector(x1+x, y1+y)) == 3:
+	# 				power_scr = 0.25*(100-i)
+	# 				print(f'power_scr: {power_scr}')
+	# 				state_value += power_scr
+	# 				break_flag = True
+	# 				break
+	# 		if break_flag: break
+	# 	if break_flag: break
 
 	return state_value
 
@@ -153,7 +185,7 @@ def next_move(
 	best = (-float('inf'), None) # (score: int, direction: str)
 	for k, v in explore_states(st).items():
 		scr = minimax(v, depth)
-		print(f'{k}={scr}, ', end='')
+		print(f'{k}={scr}\n')
 		if scr > best[0]:
 			best = (scr, k)
 	print()

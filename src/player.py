@@ -162,7 +162,7 @@ class Player(Sprite):
         self.tile_progress += self.play.player_speed*app.Application.FRAME_TIME
         if self.tile_progress >= 1:
             self.tile = [self.tile_next[0], self.tile_next[1]]
-            self.try_set_direction(ai.next_move(self.play))
+            self.try_set_direction(ai.next_move(self.play, 1))
             self.tile_progress %= 1
             self.maze.consume_tile(self.tile)
             self.update_tile_next()
