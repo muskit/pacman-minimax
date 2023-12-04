@@ -121,13 +121,14 @@ class Maze(Sprite):
         5: bonus fruit
         6: portal a
         7: portal b
-        8: dot_food_points = 10
-        9: power_pellet_points = 50
-        10: bonus_fruit = 100
-        11: ghost_points = 200 """
         
-        if not ((0 <= tile_vec.x and tile_vec.x < Maze.WIDTH) or\
-            (0 <= tile_vec.y and tile_vec.y < Maze.HEIGHT)):
+        - dot_food_points = 10
+        - power_pellet_points = 50
+        - bonus_fruit = 100
+        - ghost_points = 200 """
+        
+        if ((tile_vec.x < 0 or tile_vec.x >= Maze.WIDTH) or\
+            (tile_vec.y < 0 or tile_vec.y >= Maze.HEIGHT)):
             return -1
         strpos = Maze.tile2strpos(tile_vec)
         return int(self.maze[strpos])

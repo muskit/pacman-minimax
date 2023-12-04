@@ -8,6 +8,11 @@ from ghost import Ghost
 from maze import Maze
 from ghost_ai import *
 
+class TerminalState(Enum):
+	DEAD = -1
+	ALIVE = 0
+	WIN = 1
+
 class MMaze:
 	def __init__(self, cur_maze: list[str], remaining_pellets: int, consumed_tile: int = None):
 		# how much left to eat -- lower is better
@@ -19,9 +24,10 @@ class MMaze:
 
 	def get_tile_state(self, tile_vec: Vector):
 		"""Refer to `Maze.get_tile_state`"""
-		if not ((0 <= tile_vec.x and tile_vec.x < Maze.WIDTH) or\
-			(0 <= tile_vec.y and tile_vec.y < Maze.HEIGHT)):
+		if ((tile_vec.x < 0 or tile_vec.x >= Maze.WIDTH) or\
+            (tile_vec.y < 0 or tile_vec.y >= Maze.HEIGHT)):
 			return -1
+
 		strpos = Maze.tile2strpos(tile_vec)
 		return int(self.maze[strpos])
 
@@ -103,15 +109,15 @@ class MState:
 		for g in ghosts:
 			self.ghosts[g.name] = MGhost(g)
 
-	def is_terminal(self):
-		if self.maze.remaining_pellets == 0:
-			return True
-
+	def terminal(self):
 		for g in self.ghosts.values():
 			if g.tile == self.player.tile:
-				return True
+				return TerminalState.DEAD
+
+		if self.maze.remaining_pellets == 0:
+			return TerminalState.WIN
 			
-		return False
+		return TerminalState.ALIVE
 
 	def consume_current_tile(self):
 		self.maze.consume_tile(self.player.tile)

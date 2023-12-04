@@ -17,7 +17,7 @@ def step(state: MState, direction: str) -> MState:
 	If the state is already terminal, return the same state, since
 	nothing else can happen.
 	"""
-	if state.is_terminal(): return state
+	if state.terminal(): return state
 
 	dest_tile =\
 		(state.player.tile[0] + DIR_VECTOR[direction][0],
@@ -32,6 +32,8 @@ def step(state: MState, direction: str) -> MState:
 	# move pac man, consume tile
 	ret.player.tile = dest_tile
 	ret.consume_current_tile()
+
+	if ret.terminal(): return ret
 
 	# ghosts
 	for g in ret.ghosts.values():
@@ -68,6 +70,13 @@ def evaluate(state: MState) -> int:
 	-∞ for death state,
 	+∞ if state results in last pellet eaten (WIN!)
 	"""
+	# terminal state check
+	match state.terminal():
+		case TerminalState.DEAD:
+			return -float('inf')
+		case TerminalState.WIN:
+			return float('inf')
+
 	player_state = state.player
 	x1, y1 = player_state.tile
 	state_value = 0
@@ -87,31 +96,27 @@ def evaluate(state: MState) -> int:
 
 	# print(f'player tile: {player_state.tile}\n')
 	# Check player position from the ghosts position
-	nearest_ghost_position = 100
+	nearest_ghost_dist = float('inf')
 	for g in state.ghosts.values():
 		x2, y2 = g.tile
 		
 		distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-		if distance < nearest_ghost_position:
-			nearest_ghost_position = distance
+		if distance < nearest_ghost_dist:
+			nearest_ghost_dist = distance
 			
 	# 	print(f"{g.name} distance from pacman is {distance}")
 
 	# print(f"nearestghost distance from pacman is {nearest_ghost_position}")
-	if nearest_ghost_position >= 7:
-		state_value = state_value + 0
-	elif nearest_ghost_position >= 4:
-		state_value = state_value - 10
-	elif nearest_ghost_position >= 2:
-		state_value = state_value - 15
+	if nearest_ghost_dist >= 7:
+		state_value += 5
+	elif nearest_ghost_dist >= 4:
+		state_value -= 10
+	elif nearest_ghost_dist >= 2:
+		state_value -= 15
 	else:
 		state_value = state_value - 20
 
-	print(f"state {state_value}")
-
 	return state_value
-
-
 
 def minimax(state: MState, depth: int = 1) -> int:
 	"""
@@ -119,7 +124,7 @@ def minimax(state: MState, depth: int = 1) -> int:
 	and returns an eval score.
 	"""
 
-	if depth <= 1 or state.is_terminal():
+	if depth <= 1 or state.terminal():
 		return evaluate(state)
 	
 	value = -float('inf')
@@ -138,6 +143,7 @@ def next_move(
 	Returns one of "up", "down", "left", or "right"
 	"""
 
+	print('---------------')
 	st = MState(
 		player=MPlayer(play.player.tile, play.player.facing),
 		maze=play.maze.maze,
@@ -147,8 +153,10 @@ def next_move(
 	best = (-float('inf'), None) # (score: int, direction: str)
 	for k, v in explore_states(st).items():
 		scr = minimax(v, depth)
+		print(f'{k}={scr}, ', end='')
 		if scr > best[0]:
 			best = (scr, k)
+	print()
 	
-	print(best[1])
+	print(f'{best[1]}\n')
 	return best[1]
