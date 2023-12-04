@@ -6,9 +6,14 @@ from ghost_ai import *
 import play as pl
 from .model import *
 
-def manhattan_dist(a: tuple[int, int], b: tuple[int, int]):
-	ret = np.sum(np.abs(np.array(a), np.array(b)))
-	return ret
+def manhattan_dist(point1, point2):
+    distance = 0
+    for x1, x2 in zip(point1, point2):
+        difference = x2 - x1
+        absolute_difference = abs(difference)
+        distance += absolute_difference
+
+    return distance
 
 def step(state: MState, direction: str) -> MState:
 	"""
@@ -83,34 +88,35 @@ def evaluate(state: MState) -> int:
 			return float('inf')
 
 	player = state.player
-	x1, y1 = player.tile
+	p_x, p_y = player.tile
 	state_value = 0
 
-	next_tile_state = state.maze.consumed_tile
-	if next_tile_state == 2:
-		state_value = state_value + 3
-	elif next_tile_state == 3:
-		state_value = state_value + 8
-	elif next_tile_state == 5:
-		state_value = state_value + 4
-
 	# Check player position from the ghosts position
-	nearest_ghost_dist = float('inf')
+	ghost_scr = 0
 	for g in state.ghosts.values():
 		if g.state not in [GhostMode.CHASE, GhostMode.SCATTER]: continue
 
-		x2, y2 = g.tile
+		# x2, y2 = g.tile
 		
-		dist_squared = (x2 - x1)**2 + (y2 - y1)**2
-		nearest_ghost_dist = min(dist_squared, nearest_ghost_dist)
-	
-	if nearest_ghost_dist in [0, float('inf')]:
-		ghost_scr = 0
-	else:
-		ghost_scr = -200/nearest_ghost_dist
+		# dist_squared = (x2 - x1)**2 + (y2 - y1)**2
+		dist = manhattan_dist(g.tile, player.tile)
+		ghost_scr -= 120/dist
 
 	print(f'ghost_scr: {ghost_scr}')
 	state_value += ghost_scr
+
+	# check consumed tile
+	next_tile_state = state.maze.consumed_tile
+	consume_scr = 0
+	if next_tile_state == 2:
+		consume_scr = 10
+	elif next_tile_state == 3:
+		consume_scr = 20
+	elif next_tile_state == 5:
+		consume_scr = 8
+	
+	print(f'consume_scr: {consume_scr}')
+	state_value += consume_scr
 
 	# nearest pellet
 	pellet_layer_found = False
@@ -118,21 +124,21 @@ def evaluate(state: MState) -> int:
 	for i in range(1, 100):
 		for y in range(-i, i):
 			for x in range(-i, i):
-				if state.maze.get_tile_state(Vector(x1+x, y1+y)) in [2,3,5]:
+				tile = (p_x+x, p_y+y)
+				if state.maze.get_tile_state(Vector(*tile)) in [2,3,5]:
 					nearest_pellet_dist =\
-						min(manhattan_dist((x, y), player.tile), nearest_pellet_dist)
+						min(manhattan_dist(tile, player.tile), nearest_pellet_dist)
 					pellet_layer_found = True
-					break
 		if pellet_layer_found: break
 
-	pellet_scr = 100 - nearest_pellet_dist
+	pellet_scr = -nearest_pellet_dist
 	print(f'pellet_scr: {pellet_scr}')
 	state_value += pellet_scr
 
 	# number of pellets remaining in maze
-	remain_scr = Maze.NUM_PELLETS - state.maze.remaining_pellets
-	print(f'remain_scr: {remain_scr}')
-	state_value += remain_scr
+	# remain_scr = 20 * (Maze.NUM_PELLETS - state.maze.remaining_pellets)
+	# print(f'remain_scr: {remain_scr}')
+	# state_value += remain_scr
 				
 	# nearest power pellet
 	# break_flag = False
@@ -181,6 +187,7 @@ def next_move(
 		ghosts=play.ghosts,
 		remaining_pellets=play.maze.remaining_pellets
 	)
+	print(st)
 	opposite_dir = OPPOSITE_DIR[play.player.facing]
 
 	best = (-float('inf'), None) # (score: int, direction: str)
@@ -188,7 +195,7 @@ def next_move(
 	for k, v in possible_states.items():
 		scr = minimax(v, depth)
 		if k == opposite_dir:
-			scr -= abs(scr)/13
+			scr -= abs(scr)/2
 		print(f'{k}={scr}\n')
 		if scr > best[0]:
 			best = (scr, k)
