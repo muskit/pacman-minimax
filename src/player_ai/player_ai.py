@@ -17,7 +17,7 @@ def step(state: MState, direction: str) -> MState:
 	If the state is already terminal, return the same state, since
 	nothing else can happen.
 	"""
-	if state.terminal(): return state
+	if state.terminal() != TerminalState.ALIVE: return state
 
 	dest_tile =\
 		(state.player.tile[0] + DIR_VECTOR[direction][0],
@@ -106,7 +106,7 @@ def evaluate(state: MState) -> int:
 			
 	# 	print(f"{g.name} distance from pacman is {distance}")
 
-	# print(f"nearestghost distance from pacman is {nearest_ghost_position}")
+	# print(f"nearest ghost: {nearest_ghost_dist}")
 	if nearest_ghost_dist >= 7:
 		state_value += 5
 	elif nearest_ghost_dist >= 4:
